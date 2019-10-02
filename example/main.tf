@@ -32,11 +32,11 @@ module "ec2" {
     root_hdd_size = 50
     root_hdd_type = "gp2"
   }
-  subnet_id              = module.vpc.private_subnets[0]
+  subnet_id              = module.vpc.public_subnets[0]
   vpc_security_group_ids = module.security-group.sg_id
   key_name               = ""
   public_key             = ""
-  public_ip              = false
+  public_ip              = true
   ec2_tags = {
     ec2 = "my-ptfe-instance"
   }
@@ -56,8 +56,12 @@ module "alb" {
   ec2_instance = module.ec2.ec2_ec2_id
 
   tf_vpc = module.vpc.vpc_id
+  lbports = {
+    8800 = "HTTPS",
+    443  = "HTTPS",
+  }
 
-  tf_subnet = module.vpc.private_subnets
+  tf_subnet = module.vpc.public_subnets
   sg_id     = module.security-group.sg_id
 
   alb_tags = {

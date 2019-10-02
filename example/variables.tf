@@ -3,3 +3,8 @@ variable "tf_subnet" {
   type        = list
   default     = []
 }
+variable "lbports" {
+  description = "Default ALB listener port and protocol"
+  type        = map
+  default     = {}
+}

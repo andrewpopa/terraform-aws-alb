@@ -70,3 +70,10 @@ variable "sg_id" {
   type        = string
   default     = ""
 }
+
+variable "lbports" {
+  description = "Default ALB listener port and protocol"
+  default = {
+    443  = "HTTPS",
+  }
+}

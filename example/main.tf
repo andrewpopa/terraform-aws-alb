@@ -34,8 +34,8 @@ module "ec2" {
   }
   subnet_id              = module.vpc.public_subnets[0]
   vpc_security_group_ids = module.security-group.sg_id
-  key_name               = ""
-  public_key             = ""
+  key_name               = "andrei_ec2_public_key"
+  public_key             = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIdRIGZBoLupNf3xvLZYWEMRkhoVOs7HjB80tbTH6b/k2BEQdvfmeSgMW0K4ezavCFyo6nehEPmY194QH4NllzlvfhbdpXrNWq3iXONB6pijuH0XryB/ZEm8tyw0nRXlAAVtqzaRbYVJg41VV5KcyyfBE7nzjmIql6A67d7Pij8yKuBzmpbMWNEuYvrIZCtHqlA4hmK+RyrzyfwMdyVXC0a2TLUkKBnaFMMBD+izfUDMDwolQ+NEZ3Bl3gWRrXMjirNVKXLzKRIeO44B2L/nmiZNI58KUiYJNVRFERP0rv9Ya+NvJXh8wonTbz1viWZ0oaKubbtYcLgPoc9I7buuf9"
   public_ip              = true
   ec2_tags = {
     ec2 = "my-ptfe-instance"

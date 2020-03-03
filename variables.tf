@@ -26,54 +26,55 @@ variable "cert_chain" {
 }
 
 variable "priv_key" {
-  description = "Private key"
   type        = string
   default     = ""
+  description = "Private key"
 }
 
 variable "alb_name_prefix" {
-  description = "Load balancer name prefix"
   type        = string
   default     = ""
+  description = "Load balancer name prefix"
 }
 
 variable "ssl_policy" {
-  description = "Security policy"
   type        = string
   default     = "ELBSecurityPolicy-2016-08"
+  description = "Security policy"
 }
 
 variable "ec2_instance" {
-  description = "EC2 instance for load balancing"
   type        = string
+  default     = ""
+  description = "EC2 instance for load balancing"
 }
 
 variable "alb_target_group_name" {
-  description = "ALB target group name"
   type        = string
   default     = ""
+  description = "ALB target group name"
 }
 
 variable "tf_vpc" {
-  description = "VPC ID"
   type        = string
   default     = ""
+  description = "VPC ID"
 }
 
 variable "tf_subnet" {
-  description = "VPC list of subnets"
   type        = list
+  description = "VPC list of subnets"
 }
 
 variable "sg_id" {
-  description = "Security Group ID"
   type        = string
   default     = ""
+  description = "Security Group ID"
 }
 
 variable "lbports" {
-  description = "Default ALB listener port and protocol"
   default = {
     443  = "HTTPS",
   }
+  description = "Default ALB listener port and protocol"
 }

@@ -48,6 +48,6 @@ resource "aws_lb_target_group" "tf_target_frontend" {
 resource "aws_lb_target_group_attachment" "tf_attach_frontend" {
   count            = local.num
   target_group_arn = aws_lb_target_group.tf_target_frontend[count.index].arn
-  target_id        = var.ec2_instance
+  target_id        = var.target_id
   port             = local.keys[count.index]
 }

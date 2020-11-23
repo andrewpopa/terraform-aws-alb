@@ -1,3 +1,4 @@
+// vpc infrastructure
 module "vpc" {
   source = "github.com/andrewpopa/terraform-aws-vpc"
 
@@ -5,6 +6,7 @@ module "vpc" {
   cidr_block          = "172.16.0.0/16"
   vpc_public_subnets  = ["172.16.10.0/24", "172.16.11.0/24", "172.16.12.0/24"]
   vpc_private_subnets = ["172.16.13.0/24", "172.16.14.0/24", "172.16.15.0/24"]
+  availability_zones  = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
   vpc_tags = {
     vpc            = "my-aws-vpc"
     public_subnet  = "public-subnet"
@@ -14,6 +16,7 @@ module "vpc" {
   }
 }
 
+// security group
 module "security-group" {
   source = "github.com/andrewpopa/terraform-aws-security-group"
 
@@ -21,9 +24,15 @@ module "security-group" {
   security_group_name        = "my-aws-security-group"
   security_group_description = "my-aws-security-group-descr"
   ingress_ports              = [22, 443, 8800, 5432]
-  tf_vpc                     = module.vpc.vpc_id
+  vpc_id                     = module.vpc.vpc_id
 }
 
+// ssh keys
+module "key-pair" {
+  source = "github.com/andrewpopa/terraform-aws-key-pair"
+}
+
+// ec2 instances
 module "ec2" {
   source   = "github.com/andrewpopa/terraform-aws-ec2"
   ami_type = "ami-0085d4f8878cddc81"
@@ -34,37 +43,51 @@ module "ec2" {
   }
   subnet_id              = module.vpc.public_subnets[0]
   vpc_security_group_ids = module.security-group.sg_id
-  key_name               = "andrei_ec2_public_key"
-  public_key             = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDIdRIGZBoLupNf3xvLZYWEMRkhoVOs7HjB80tbTH6b/k2BEQdvfmeSgMW0K4ezavCFyo6nehEPmY194QH4NllzlvfhbdpXrNWq3iXONB6pijuH0XryB/ZEm8tyw0nRXlAAVtqzaRbYVJg41VV5KcyyfBE7nzjmIql6A67d7Pij8yKuBzmpbMWNEuYvrIZCtHqlA4hmK+RyrzyfwMdyVXC0a2TLUkKBnaFMMBD+izfUDMDwolQ+NEZ3Bl3gWRrXMjirNVKXLzKRIeO44B2L/nmiZNI58KUiYJNVRFERP0rv9Ya+NvJXh8wonTbz1viWZ0oaKubbtYcLgPoc9I7buuf9"
+  key_name               = module.key-pair.public_key_name
+  public_key             = module.key-pair.public_key
   public_ip              = true
   ec2_tags = {
     ec2 = "my-ptfe-instance"
   }
 }
 
+// letsencrypt certificates
+module "acme" {
+  source        = "github.com/andrewpopa/terraform-acme-letsencrypt"
+  acme_provider = "https://acme-v02.api.letsencrypt.org/directory"
+  email_address = "<EMAIL>"
+  common_name   = "<DOMAIN>"
+  dns_provider  = "cloudflare"
+  dns_config = {
+    CLOUDFLARE_EMAIL          = "<EMAIL>"
+    CLOUDFLARE_API_KEY        = "<CLOUDFLARE_API>"
+    CLOUDFLARE_ZONE_API_TOKEN = "<CLOUDFLARE_ZONE_TOKEN>"
+  }
+}
+
+// application load balancer
 module "alb" {
   source = "../"
 
-  # Load balancer
-  name_cert       = "ptfe-lb-certs"
-  cert_body       = "${file("files/cert1.pem")}"
-  cert_chain      = "${file("files/chain1.pem")}"
-  priv_key        = "${file("files/privkey1.pem")}"
-  alb_name_prefix = "ptfe-loadbalancer"
+  // Load balancer
+  certificate_chain = module.acme.fullchain_pem
+  certificate_body  = module.acme.certificate_pem
+  private_key       = module.acme.private_key
+  alb_name_prefix   = "ptfe-loadbalancer"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  target_id         = join("", module.ec2.id)
+  vpc_id            = module.vpc.vpc_id
+  tf_subnet         = module.vpc.public_subnets
+  sg_id             = module.security-group.sg_id
 
-  ssl_policy   = "ELBSecurityPolicy-2016-08"
-  ec2_instance = module.ec2.ec2_ec2_id
-
-  tf_vpc = module.vpc.vpc_id
   lbports = {
     8800 = "HTTPS",
     443  = "HTTPS",
   }
-
-  tf_subnet = module.vpc.public_subnets
-  sg_id     = module.security-group.sg_id
-
   alb_tags = {
-    lb = "alb-name"
+    name = "alb-name"
+  }
+  cert_tags = {
+    name = "letsencrypt-certificates"
   }
 }

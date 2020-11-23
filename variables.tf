@@ -3,29 +3,31 @@
 variable "alb_tags" {
   type = map
   default = {
-    lb = "alb-name"
+    name = "alb-name"
   }
 }
 
-variable "name_cert" {
+variable "certificate_body" {
   type        = string
-  default     = "alb-certs"
-  description = "Certificates for load balancer"
+  description = "certificate body"
 }
 
-variable "cert_body" {
+variable "certificate_chain" {
   type        = string
-  description = "Certificate body"
+  description = "certificate chain"
 }
 
-variable "cert_chain" {
+variable "private_key" {
   type        = string
-  description = "Certificate chain"
+  description = "private key"
 }
 
-variable "priv_key" {
-  type        = string
-  description = "Private key"
+variable "cert_tags" {
+  type        = map(string)
+  description = "tags for certificate import"
+  default = {
+    name = "imported-certificate"
+  }
 }
 
 variable "alb_name_prefix" {
@@ -44,12 +46,7 @@ variable "target_id" {
   description = "EC2 instance for load balancing"
 }
 
-variable "alb_target_group_name" {
-  type        = string
-  description = "ALB target group name"
-}
-
-variable "tf_vpc" {
+variable "vpc_id" {
   type        = string
   description = "VPC ID"
 }
@@ -65,8 +62,9 @@ variable "sg_id" {
 }
 
 variable "lbports" {
+  type        = map(string)
+  description = "application loadbalancer ports map"
   default = {
-    443  = "HTTPS",
+    443 = "HTTPS"
   }
-  description = "Default ALB listener port and protocol"
 }

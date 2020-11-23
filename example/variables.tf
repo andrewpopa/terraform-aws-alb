@@ -1,10 +1,7 @@
-variable "tf_subnet" {
-  description = "VPC subnets"
-  type        = list
-  default     = []
-}
 variable "lbports" {
-  description = "Default ALB listener port and protocol"
-  type        = map
-  default     = {}
+  type        = map(string)
+  description = "application loadbalancer ports map"
+  default = {
+    443 = "HTTPS"
+  }
 }

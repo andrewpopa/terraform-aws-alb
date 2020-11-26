@@ -41,11 +41,6 @@ variable "ssl_policy" {
   description = "Security policy"
 }
 
-variable "target_id" {
-  type        = string
-  description = "EC2 instance for load balancing"
-}
-
 variable "vpc_id" {
   type        = string
   description = "VPC ID"
